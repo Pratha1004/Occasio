@@ -1,26 +1,169 @@
 @import "tailwindcss";
 
+/* ── Light Mode — Refined Neutral ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surface scale — cool white → near-white → light gray */
+  --background:        #FAFAFA;
+  --card:              #FFFFFF;
+  --card-foreground:   #111827;
+  --surface:           #F4F4F5;
+  --sidebar:           #FFFFFF;
+  --drawer:            #FFFFFF;
+
+  /* Text scale */
+  --foreground:        #18181B;
+  --muted:             #52525B;
+  --muted-foreground:  #71717A;
+  --disabled:          #A1A1AA;
+
+  /* Brand — restrained navy-blue (not electric blue) */
+  --primary:           #1E40AF;
+  --primary-foreground:#FFFFFF;
+
+  /* Subtle fill for active/hover states */
+  --secondary:         #EFF6FF;
+  --secondary-foreground:#1E40AF;
+
+  /* Borders — very light, hair-line */
+  --border:            #E4E4E7;
+  --divider:           #F1F1F2;
+
+  /* Sidebar active pill */
+  --sidebar-active:    #EFF6FF;
+
+  /* Utility accents (keep minimal) */
+  --coral:    #EF4444;
+  --success:  #16A34A;
+  --amber:    #D97706;
+
+  /* Shadows — very subtle */
+  --shadow-card:  0 1px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-hover: 0 4px 16px rgba(0,0,0,0.08);
 }
 
+/* ── Dark Mode — Deep Neutral ── */
+.dark {
+  --background:        #09090B;
+  --card:              #111113;
+  --card-foreground:   #FAFAFA;
+  --surface:           #18181B;
+  --sidebar:           #09090B;
+  --drawer:            #111113;
+
+  --foreground:        #FAFAFA;
+  --muted:             #A1A1AA;
+  --muted-foreground:  #71717A;
+  --disabled:          #3F3F46;
+
+  --primary:           #3B82F6;
+  --primary-foreground:#FFFFFF;
+
+  --secondary:         #1E3A5F;
+  --secondary-foreground:#93C5FD;
+
+  --border:            #27272A;
+  --divider:           #18181B;
+
+  --sidebar-active:    #1A2D47;
+
+  --coral:    #F87171;
+  --success:  #4ADE80;
+  --amber:    #FBBF24;
+
+  --shadow-card:  0 1px 4px rgba(0,0,0,0.4);
+  --shadow-hover: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+/* ── Tailwind Theme Mapping ── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background:       var(--background);
+  --color-foreground:       var(--foreground);
+  --color-card:             var(--card);
+  --color-card-foreground:  var(--card-foreground);
+  --color-surface:          var(--surface);
+  --color-primary:          var(--primary);
+  --color-primary-foreground:var(--primary-foreground);
+  --color-secondary:        var(--secondary);
+  --color-secondary-foreground:var(--secondary-foreground);
+  --color-muted:            var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border:           var(--border);
+  --color-sidebar:          var(--sidebar);
+  --color-sidebar-active:   var(--sidebar-active);
+  --color-drawer:           var(--drawer);
+  --font-sans:    var(--font-poppins);
+  --font-display: var(--font-poppins);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+html { scroll-behavior: smooth; }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Only transition color properties — avoids jank on hover transforms */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke, opacity;
+  transition-duration: 180ms;
+  transition-timing-function: ease;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+/* ── Ticket scalloped notch — left side cut ── */
+.ticket-notch-left {
+  mask-image: radial-gradient(circle at 0% 50%, transparent 20px, black 20.5px);
+  -webkit-mask-image: radial-gradient(circle at 0% 50%, transparent 20px, black 20.5px);
+}
+
+/* ── Ticket scalloped notch — right side cut ── */
+.ticket-notch-right {
+  mask-image: radial-gradient(circle at 100% 50%, transparent 20px, black 20.5px);
+  -webkit-mask-image: radial-gradient(circle at 100% 50%, transparent 20px, black 20.5px);
+}
+
+/* ── Ticket notch BOTH sides ── */
+.ticket-notch-both {
+  mask-image:
+    radial-gradient(circle at 0% 50%, transparent 22px, black 22.5px),
+    radial-gradient(circle at 100% 50%, transparent 22px, black 22.5px);
+  -webkit-mask-image:
+    radial-gradient(circle at 0% 50%, transparent 22px, black 22.5px),
+    radial-gradient(circle at 100% 50%, transparent 22px, black 22.5px);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+
+/* ── Ribbon Flag Fold ── */
+.ribbon-flag {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+}
+
+/* ── Hero dot pattern ── */
+.hero-dots {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* ── Scrollbar ── */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+/* ── Heading utility ── */
+.font-display {
+  font-family: var(--font-poppins), system-ui, sans-serif;
 }

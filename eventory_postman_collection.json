@@ -1,0 +1,141 @@
+{
+  "info": {
+    "_postman_id": "4b6f790c-d40b-4d7a-8f55-123456789abc",
+    "name": "Eventory API (Mocked Local)",
+    "description": "This collection represents the frontend API surface for Eventory. Since the application operates entirely on local JSON data (as per the constraints), these endpoints document how the Next.js API Routes would behave in a real production backend. For the purpose of this assignment, the frontend filtering handles these operations virtually over the `events.json` data.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Get All Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "music",
+                  "description": "Filter by event category (e.g., music, tech, art)",
+                  "disabled": true
+                },
+                {
+                  "key": "isFree",
+                  "value": "true",
+                  "description": "Filter by free events only",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "summit",
+                  "description": "Search by event title or description",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retrieves the list of all events. In the current local implementation, this matches the frontend logic where `events.json` is mapped and filtered based on the React Context state."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/events/evt-001",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "evt-001"
+              ]
+            },
+            "description": "Retrieves the detailed payload of a single event by its ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Save Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/events/evt-001/save",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "evt-001",
+                "save"
+              ]
+            },
+            "description": "Toggles the 'saved' state for a specific event for the current user session. Currently handled in `AppProvider` context via LocalStorage."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
