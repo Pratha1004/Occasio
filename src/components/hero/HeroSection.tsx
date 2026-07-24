@@ -61,30 +61,87 @@ export function HeroSection() {
   return (
     <section
       aria-labelledby="hero-heading"
-      className="relative mb-6 text-white rounded-[24px] md:rounded-[32px] overflow-hidden md:overflow-visible"
-      style={{ backgroundColor: "#06132b" }}
+      className="relative mb-6 text-white"
+      style={{ isolation: "isolate" }}
     >
-      {/* ── Background Card Wrapper ── */}
-      <div className="absolute inset-0 rounded-[24px] md:rounded-[32px] overflow-hidden pointer-events-none">
-        {/* Floating Background Blobs */}
+      {/* ── SVG Ticket-shaped background with perforated notches ── */}
+      {/* Uses a 1000×320 viewBox; the notch circles are at the vertical midpoint on each side */}
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        viewBox="0 0 1000 320"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <clipPath id="ticket-clip">
+            {/*
+              Ticket shape:
+              - Rounded corners (r=18)
+              - Semicircle notch cut into left edge at vertical midpoint (cy=160, r=22, bulging inward)
+              - Semicircle notch cut into right edge at vertical midpoint (cy=160, r=22, bulging inward)
+              Using "evenodd" fill-rule: the inner circles subtract from the outer rect.
+            */}
+            <path
+              fillRule="evenodd"
+              d="
+                M 18 0
+                H 982
+                Q 1000 0 1000 18
+                V 138
+                A 22 22 0 0 0 1000 182
+                V 302
+                Q 1000 320 982 320
+                H 18
+                Q 0 320 0 302
+                V 182
+                A 22 22 0 0 0 0 138
+                V 18
+                Q 0 0 18 0
+                Z
+              "
+            />
+          </clipPath>
+          {/* Dotted pattern */}
+          <pattern id="dot-grid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="1" fill="#475569" opacity="0.35" />
+          </pattern>
+        </defs>
+
+        {/* Base dark navy fill clipped to ticket shape */}
+        <rect width="1000" height="320" fill="#06132b" clipPath="url(#ticket-clip)" />
+
+        {/* Dot grid overlay clipped to ticket shape */}
+        <rect width="1000" height="320" fill="url(#dot-grid)" clipPath="url(#ticket-clip)" />
+
+        {/* Left ambient glow blob */}
+        <ellipse cx="80" cy="80" rx="180" ry="180" fill="#3B82F6" opacity="0.08" clipPath="url(#ticket-clip)" />
+
+        {/* Right ambient glow blob */}
+        <ellipse cx="920" cy="260" rx="220" ry="200" fill="#6366F1" opacity="0.08" clipPath="url(#ticket-clip)" />
+
+        {/* Perforated dashed divider line — vertical at ~65% from left */}
+        <line
+          x1="648" y1="12" x2="648" y2="308"
+          stroke="#334155"
+          strokeWidth="1.5"
+          strokeDasharray="6 5"
+          opacity="0.6"
+          clipPath="url(#ticket-clip)"
+        />
+      </svg>
+
+      {/* ── Animated blobs layer (on top of SVG, clipped by same shape via overflow-hidden wrapper) ── */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-none" style={{ clipPath: "none" }}>
         <motion.div
           animate={{ x: [0, 20, -10, 0], y: [0, -20, 10, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-20 -left-20 w-[240px] md:w-[300px] h-[240px] md:h-[300px] bg-primary/20 rounded-full blur-[80px]"
+          className="absolute -top-20 -left-20 w-[240px] md:w-[300px] h-[240px] md:h-[300px] bg-primary/15 rounded-full blur-[80px]"
         />
         <motion.div
           animate={{ x: [0, -20, 10, 0], y: [0, 20, -10, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute -bottom-20 right-10 w-[300px] md:w-[400px] h-[300px] md:h-[400px] bg-indigo-500/15 rounded-full blur-[90px]"
-        />
-
-        {/* Dotted Grid Overlay */}
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: "radial-gradient(circle, #475569 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
+          className="absolute -bottom-20 right-10 w-[300px] md:w-[400px] h-[300px] md:h-[400px] bg-indigo-500/10 rounded-full blur-[90px]"
         />
       </div>
 
@@ -122,6 +179,16 @@ export function HeroSection() {
               WITH YOU
             </span>
           </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.18 }}
+            className="text-[11px] sm:text-[12px] text-slate-400 leading-relaxed max-w-[260px] hidden sm:block"
+          >
+            Concerts, workshops, festivals, sports and more amazing events around you
+          </motion.p>
 
           {/* Stats Row */}
           <motion.div
