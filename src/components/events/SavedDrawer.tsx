@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Bookmark, Trash2, QrCode, Ticket, ArrowRight } from "lucide-react";
+import { X, Bookmark, Trash2, QrCode, Ticket, ArrowRight, CheckCircle2, Circle } from "lucide-react";
 import Image from "next/image";
 import { useSavedEvents, useDrawer, useEvents, useModals } from "@/providers/AppProvider";
 import { TicketBarcode } from "@/components/ui/TicketBarcode";
@@ -14,6 +15,16 @@ export function SavedDrawer() {
   const { openEventModal } = useModals();
 
   const savedEvents = events.filter((e: Event) => savedIds.has(e.id));
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Default to first saved event when list changes
+  useEffect(() => {
+    if (savedEvents.length > 0 && (!selectedId || !savedEvents.some((e) => e.id === selectedId))) {
+      setSelectedId(savedEvents[0].id);
+    }
+  }, [savedEvents, selectedId]);
+
+  const selectedEvent = savedEvents.find((e) => e.id === selectedId) || savedEvents[0];
 
   const handleBookEvent = (event: Event) => {
     close();
@@ -82,64 +93,88 @@ export function SavedDrawer() {
                   </p>
                 </div>
               ) : (
-                savedEvents.map((event) => (
-                  <motion.div
-                    key={event.id}
-                    layout
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="relative overflow-hidden rounded-2xl border border-border/60 bg-background/80 p-4 shadow-xs"
-                  >
-                    <div className="flex items-start gap-3.5">
-                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary">
-                        <Image
-                          src={event.image}
-                          alt={event.imageAlt}
-                          fill
-                          className="object-cover"
-                          sizes="64px"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 className="text-xs font-bold text-foreground truncate">
-                            {event.title}
-                          </h4>
+                savedEvents.map((event) => {
+                  const isSelected = selectedId === event.id;
+                  return (
+                    <motion.div
+                      key={event.id}
+                      layout
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      onClick={() => setSelectedId(event.id)}
+                      className={`relative overflow-hidden rounded-2xl border p-4 transition-all cursor-pointer ${
+                        isSelected
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                          : "border-border/60 bg-background/80 hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3.5">
+                        {/* Radio selection indicator */}
+                        <div className="pt-0.5 text-primary shrink-0">
+                          {isSelected ? (
+                            <CheckCircle2 className="h-5 w-5 fill-primary text-primary-foreground" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-muted-foreground/40 hover:text-muted-foreground" />
+                          )}
+                        </div>
+
+                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary">
+                          <Image
+                            src={event.image}
+                            alt={event.imageAlt}
+                            fill
+                            className="object-cover"
+                            sizes="64px"
+                          />
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="text-xs font-bold text-foreground truncate">
+                              {event.title}
+                            </h4>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleSave(event.id);
+                              }}
+                              className="text-muted-foreground hover:text-red-500 transition-colors p-1"
+                              aria-label={`Remove ${event.title}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <p className="mt-1 text-[11px] text-muted-foreground">
+                            {event.dateLabel} · {event.venue}
+                          </p>
+                          <div className="mt-2 flex items-center justify-between">
+                            <span className="text-xs font-extrabold text-primary">
+                              {event.priceLabel}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <QrCode className="h-4 w-4 text-muted-foreground" />
+                              <TicketBarcode orientation="horizontal" height={12} className="text-muted-foreground/60" />
+                            </div>
+                          </div>
+                          {/* Per-card Book button */}
                           <button
                             type="button"
-                            onClick={() => toggleSave(event.id)}
-                            className="text-muted-foreground hover:text-red-500 transition-colors p-1"
-                            aria-label={`Remove ${event.title}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleBookEvent(event);
+                            }}
+                            className="mt-2.5 w-full flex items-center justify-center gap-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary py-1.5 text-[11px] font-bold transition-colors"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Ticket className="h-3.5 w-3.5" />
+                            Book Now
                           </button>
                         </div>
-                        <p className="mt-1 text-[11px] text-muted-foreground">
-                          {event.dateLabel} · {event.venue}
-                        </p>
-                        <div className="mt-2 flex items-center justify-between">
-                          <span className="text-xs font-extrabold text-primary">
-                            {event.priceLabel}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <QrCode className="h-4 w-4 text-muted-foreground" />
-                            <TicketBarcode orientation="horizontal" height={12} className="text-muted-foreground/60" />
-                          </div>
-                        </div>
-                        {/* Per-card Book button */}
-                        <button
-                          type="button"
-                          onClick={() => handleBookEvent(event)}
-                          className="mt-2 w-full flex items-center justify-center gap-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary py-1.5 text-[11px] font-bold transition-colors"
-                        >
-                          <Ticket className="h-3.5 w-3.5" />
-                          Book Now
-                        </button>
                       </div>
-                    </div>
-                  </motion.div>
-                ))
+                    </motion.div>
+                  );
+                })
               )}
             </div>
 
@@ -148,11 +183,12 @@ export function SavedDrawer() {
               <div className="border-t border-border/80 p-6 space-y-3 bg-card">
                 <button
                   type="button"
-                  onClick={() => savedEvents[0] && handleBookEvent(savedEvents[0])}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-xs font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90"
+                  disabled={!selectedEvent}
+                  onClick={() => selectedEvent && handleBookEvent(selectedEvent)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-xs font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90 disabled:opacity-50"
                 >
-                  Book Saved Tickets
-                  <ArrowRight className="h-4 w-4" />
+                  {selectedEvent ? `Book Selected Ticket: ${selectedEvent.title}` : "Book Saved Tickets"}
+                  <ArrowRight className="h-4 w-4 shrink-0" />
                 </button>
               </div>
             )}
