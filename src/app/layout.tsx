@@ -21,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-300 font-sans font-normal">
+    <html lang="en" className={`${poppins.variable} h-full antialiased`} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-300 font-sans font-normal" suppressHydrationWarning>
         <AppProvider>{children}</AppProvider>
       </body>
     </html>

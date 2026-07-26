@@ -9,6 +9,7 @@ import {
 import Image from "next/image";
 import { useBookedTickets } from "@/providers/AppProvider";
 import { cn } from "@/lib/utils";
+import type { BookedTicket } from "@/lib/types";
 
 function TicketQRMini({ seed, size = "sm" }: { seed: string; size?: "sm" | "lg" }) {
   // Deterministic pattern from seed string
@@ -44,6 +45,100 @@ export function MyTicketsView() {
   const { bookedTickets, cancelTicket } = useBookedTickets();
   const [expandedTicket, setExpandedTicket] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [downloadedId, setDownloadedId] = useState<string | null>(null);
+
+  const handleDownloadPass = (e: React.MouseEvent, ticket: BookedTicket) => {
+    e.stopPropagation();
+
+    const totalDisplay =
+      ticket.totalAmount === 0
+        ? "FREE"
+        : `₹${ticket.totalAmount.toLocaleString()}`;
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Occasio Pass – ${ticket.eventTitle}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #0f0f1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 24px; }
+    .pass { width: 480px; background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border-radius: 24px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.6); border: 1px solid rgba(99,102,241,0.3); }
+    .pass-header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 28px 28px 20px; }
+    .brand { font-size: 10px; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 6px; }
+    .event-title { font-size: 22px; font-weight: 900; color: #fff; line-height: 1.2; }
+    .badge { display: inline-block; margin-top: 10px; background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(52,211,153,0.4); border-radius: 999px; padding: 3px 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; }
+    .pass-body { padding: 24px 28px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; margin-bottom: 24px; }
+    .field label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: #64748b; font-weight: 700; display: block; margin-bottom: 3px; }
+    .field span { font-size: 13px; font-weight: 700; color: #e2e8f0; }
+    .divider { border: none; border-top: 1px dashed rgba(99,102,241,0.3); margin: 20px 0; }
+    .qr-section { display: flex; align-items: center; justify-content: space-between; }
+    .qr-info label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: #64748b; font-weight: 700; display: block; margin-bottom: 4px; }
+    .qr-code-text { font-family: monospace; font-size: 9px; color: #818cf8; word-break: break-all; max-width: 280px; line-height: 1.6; }
+    .qr-box { width: 72px; height: 72px; background: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .qr-placeholder { width: 56px; height: 56px; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 2px; }
+    .qr-cell { background: #1e1b4b; border-radius: 1px; }
+    .qr-cell.w { background: transparent; }
+    .pass-footer { background: rgba(0,0,0,0.3); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; }
+    .pass-footer span { font-size: 10px; color: #475569; }
+    .price { font-size: 16px; font-weight: 900; color: #818cf8; }
+    @media print {
+      body { background: white; padding: 0; }
+      .pass { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="pass">
+    <div class="pass-header">
+      <div class="brand">✦ Occasio Digital Pass</div>
+      <div class="event-title">${ticket.eventTitle}</div>
+      <div class="badge">✓ ACTIVE / VALID ENTRY</div>
+    </div>
+    <div class="pass-body">
+      <div class="grid">
+        <div class="field"><label>Ticket ID</label><span>${ticket.ticketId}</span></div>
+        <div class="field"><label>Pass Type</label><span>${ticket.tierName}</span></div>
+        <div class="field"><label>Date</label><span>${ticket.dateLabel}</span></div>
+        <div class="field"><label>Time</label><span>${ticket.time}</span></div>
+        <div class="field"><label>Venue</label><span>${ticket.venue}</span></div>
+        <div class="field"><label>Quantity</label><span>${ticket.quantity}x</span></div>
+        <div class="field"><label>Guest Name</label><span>${ticket.buyerName || "Guest"}</span></div>
+        <div class="field"><label>Total Paid</label><span>${totalDisplay}</span></div>
+      </div>
+      <hr class="divider" />
+      <div class="qr-section">
+        <div class="qr-info">
+          <label>Entry Barcode / QR Seed</label>
+          <div class="qr-code-text">${ticket.qrCodeSeed}</div>
+        </div>
+        <div class="qr-box">
+          <div class="qr-placeholder">
+            ${[1,1,1,1,1,1,0,0,0,1,1,0,1,0,1,1,0,0,0,1,1,1,1,1,1].map(v=>`<div class="qr-cell${v===0?' w':''}"></div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pass-footer">
+      <span>Present at venue entry • Occasio Event Discovery</span>
+      <span class="price">${totalDisplay}</span>
+    </div>
+  </div>
+  <script>window.onload=()=>{window.print();}<\/script>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank");
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+    }
+
+    setDownloadedId(ticket.ticketId);
+    setTimeout(() => setDownloadedId(null), 2500);
+  };
 
   const handleCancel = (ticketId: string) => {
     setCancellingId(ticketId);
@@ -199,11 +294,25 @@ export function MyTicketsView() {
                         <div className="flex gap-2">
                           <button
                             type="button"
-                            onClick={(e) => { e.stopPropagation(); }}
-                            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-white/20 py-2.5 text-xs font-bold text-white hover:bg-white/10 transition-colors"
+                            onClick={(e) => handleDownloadPass(e, ticket)}
+                            className={cn(
+                              "flex-1 flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-xs font-bold transition-all cursor-pointer",
+                              downloadedId === ticket.ticketId
+                                ? "border-emerald-400 bg-emerald-500/20 text-emerald-300"
+                                : "border-white/20 text-white hover:bg-white/10"
+                            )}
                           >
-                            <Download className="h-3.5 w-3.5" />
-                            Download Pass
+                            {downloadedId === ticket.ticketId ? (
+                              <>
+                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                                Pass Downloaded!
+                              </>
+                            ) : (
+                              <>
+                                <Download className="h-3.5 w-3.5" />
+                                Download Pass
+                              </>
+                            )}
                           </button>
                           <button
                             type="button"

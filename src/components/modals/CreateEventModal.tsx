@@ -215,13 +215,17 @@ export function CreateEventModal() {
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">
                   City Location
                 </label>
-                <input
-                  type="text"
+                <select
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Mumbai"
-                  className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs font-semibold text-foreground focus:border-primary focus:outline-none"
-                />
+                  className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs font-semibold text-foreground focus:border-primary focus:outline-none appearance-none cursor-pointer"
+                >
+                  <option value="Mumbai">Mumbai</option>
+                  <option value="Delhi">New Delhi</option>
+                  <option value="Bangalore">Bangalore</option>
+                  <option value="Goa">Goa</option>
+                  <option value="Hyderabad">Hyderabad</option>
+                </select>
               </div>
             </div>
 

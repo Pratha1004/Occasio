@@ -19,6 +19,7 @@ import {
   QrCode,
   ShieldCheck,
   Building2,
+  Download,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -64,6 +65,7 @@ export function EventDetailModal() {
   const [email, setEmail] = useState("prabh@occasio.app");
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card">("upi");
   const [confirmedTicket, setConfirmedTicket] = useState<any>(null);
+  const [downloadedModalPass, setDownloadedModalPass] = useState(false);
 
   if (!selectedEvent) return null;
 
@@ -73,6 +75,99 @@ export function EventDetailModal() {
   const currentTier = TICKET_TIERS.find((t) => t.id === selectedTierId) || TICKET_TIERS[0];
   const unitPrice = selectedEvent.isFree ? 0 : Math.round(basePrice * currentTier.priceMultiplier);
   const totalPrice = unitPrice * quantity;
+
+  const handleDownloadConfirmedPass = () => {
+    if (!confirmedTicket) return;
+
+    const totalDisplay =
+      confirmedTicket.totalPrice === 0
+        ? "FREE"
+        : `₹${confirmedTicket.totalPrice.toLocaleString()}`;
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Occasio Pass – ${confirmedTicket.eventTitle}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #0f0f1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 24px; }
+    .pass { width: 480px; background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border-radius: 24px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.6); border: 1px solid rgba(99,102,241,0.3); }
+    .pass-header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 28px 28px 20px; }
+    .brand { font-size: 10px; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 6px; }
+    .event-title { font-size: 22px; font-weight: 900; color: #fff; line-height: 1.2; }
+    .badge { display: inline-block; margin-top: 10px; background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(52,211,153,0.4); border-radius: 999px; padding: 3px 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; }
+    .pass-body { padding: 24px 28px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; margin-bottom: 24px; }
+    .field label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: #64748b; font-weight: 700; display: block; margin-bottom: 3px; }
+    .field span { font-size: 13px; font-weight: 700; color: #e2e8f0; }
+    .divider { border: none; border-top: 1px dashed rgba(99,102,241,0.3); margin: 20px 0; }
+    .qr-section { display: flex; align-items: center; justify-content: space-between; }
+    .qr-info label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: #64748b; font-weight: 700; display: block; margin-bottom: 4px; }
+    .qr-code-text { font-family: monospace; font-size: 9px; color: #818cf8; word-break: break-all; max-width: 280px; line-height: 1.6; }
+    .qr-box { width: 72px; height: 72px; background: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .qr-placeholder { width: 56px; height: 56px; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 2px; }
+    .qr-cell { background: #1e1b4b; border-radius: 1px; }
+    .qr-cell.w { background: transparent; }
+    .pass-footer { background: rgba(0,0,0,0.3); padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; }
+    .pass-footer span { font-size: 10px; color: #475569; }
+    .price { font-size: 16px; font-weight: 900; color: #818cf8; }
+    @media print {
+      body { background: white; padding: 0; }
+      .pass { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="pass">
+    <div class="pass-header">
+      <div class="brand">✦ Occasio Digital Pass</div>
+      <div class="event-title">${confirmedTicket.eventTitle}</div>
+      <div class="badge">✓ ACTIVE / VALID ENTRY</div>
+    </div>
+    <div class="pass-body">
+      <div class="grid">
+        <div class="field"><label>Ticket ID</label><span>${confirmedTicket.ticketId}</span></div>
+        <div class="field"><label>Pass Type</label><span>${confirmedTicket.tierName}</span></div>
+        <div class="field"><label>Date</label><span>${confirmedTicket.dateLabel}</span></div>
+        <div class="field"><label>Time</label><span>${confirmedTicket.time}</span></div>
+        <div class="field"><label>Venue</label><span>${confirmedTicket.venue}</span></div>
+        <div class="field"><label>Quantity</label><span>${confirmedTicket.quantity}x</span></div>
+        <div class="field"><label>Guest Name</label><span>${confirmedTicket.buyerName}</span></div>
+        <div class="field"><label>Total Paid</label><span>${totalDisplay}</span></div>
+      </div>
+      <hr class="divider" />
+      <div class="qr-section">
+        <div class="qr-info">
+          <label>Entry Barcode / QR Seed</label>
+          <div class="qr-code-text">${confirmedTicket.qrCodeSeed}</div>
+        </div>
+        <div class="qr-box">
+          <div class="qr-placeholder">
+            ${[1,1,1,1,1,1,0,0,0,1,1,0,1,0,1,1,0,0,0,1,1,1,1,1,1].map(v=>`<div class="qr-cell${v===0?' w':''}"></div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pass-footer">
+      <span>Present at venue entry • Occasio Event Discovery</span>
+      <span class="price">${totalDisplay}</span>
+    </div>
+  </div>
+  <script>window.onload=()=>{window.print();}<\/script>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank");
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+    }
+
+    setDownloadedModalPass(true);
+    setTimeout(() => setDownloadedModalPass(false), 2500);
+  };
 
   const handleBookNow = () => {
     if (selectedEvent.isFree) {
@@ -571,20 +666,35 @@ export function EventDetailModal() {
             )}
 
             {bookingStep === "confirmed" && (
-              <div className="flex w-full items-center justify-between gap-3">
+              <div className="flex w-full items-center justify-between gap-2.5">
                 <button
                   type="button"
-                  onClick={handleClose}
-                  className="flex-1 rounded-xl border border-border py-3 text-xs font-bold text-foreground hover:bg-secondary"
+                  onClick={handleDownloadConfirmedPass}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1.5 rounded-xl border py-3 text-xs font-bold transition-all cursor-pointer",
+                    downloadedModalPass
+                      ? "border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                      : "border-border bg-secondary text-foreground hover:bg-border"
+                  )}
                 >
-                  Done
+                  {downloadedModalPass ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                      <span>Downloaded!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4" />
+                      <span>Download Pass</span>
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
                   onClick={viewInMyTickets}
                   className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-xs font-bold text-primary-foreground shadow-md hover:bg-primary/90"
                 >
-                  <span>View in My Tickets</span>
+                  <span>My Tickets Wallet</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>

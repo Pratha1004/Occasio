@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Bookmark, Trash2, QrCode, Ticket, ArrowRight } from "lucide-react";
 import Image from "next/image";
-import { useSavedEvents, useDrawer, useEvents } from "@/providers/AppProvider";
+import { useSavedEvents, useDrawer, useEvents, useModals } from "@/providers/AppProvider";
 import { TicketBarcode } from "@/components/ui/TicketBarcode";
 import type { Event } from "@/lib/types";
 
@@ -11,8 +11,15 @@ export function SavedDrawer() {
   const { isOpen, close } = useDrawer();
   const { savedIds, toggleSave } = useSavedEvents();
   const { events } = useEvents();
+  const { openEventModal } = useModals();
 
   const savedEvents = events.filter((e: Event) => savedIds.has(e.id));
+
+  const handleBookEvent = (event: Event) => {
+    close();
+    // Small delay so drawer exit animation plays cleanly before modal opens
+    setTimeout(() => openEventModal(event), 200);
+  };
 
   return (
     <AnimatePresence>
@@ -120,6 +127,15 @@ export function SavedDrawer() {
                             <TicketBarcode orientation="horizontal" height={12} className="text-muted-foreground/60" />
                           </div>
                         </div>
+                        {/* Per-card Book button */}
+                        <button
+                          type="button"
+                          onClick={() => handleBookEvent(event)}
+                          className="mt-2 w-full flex items-center justify-center gap-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary py-1.5 text-[11px] font-bold transition-colors"
+                        >
+                          <Ticket className="h-3.5 w-3.5" />
+                          Book Now
+                        </button>
                       </div>
                     </div>
                   </motion.div>
@@ -132,7 +148,7 @@ export function SavedDrawer() {
               <div className="border-t border-border/80 p-6 space-y-3 bg-card">
                 <button
                   type="button"
-                  onClick={close}
+                  onClick={() => savedEvents[0] && handleBookEvent(savedEvents[0])}
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-xs font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90"
                 >
                   Book Saved Tickets

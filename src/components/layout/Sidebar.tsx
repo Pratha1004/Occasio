@@ -1,8 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Compass, LayoutGrid, Calendar, Map, Bookmark,
-  Ticket, Users, Plus, HelpCircle, X, Gift, Moon, Sun,
+  Ticket, Users, Plus, HelpCircle, X, Gift, Moon, Sun, Check,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -42,6 +43,26 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const { activeTab, setActiveTab } = useNavigation();
   const { openCreateEventModal } = useModals();
 
+  const [copiedInvite, setCopiedInvite] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleSendInvite = async () => {
+    const inviteUrl = typeof window !== "undefined" ? window.location.origin : "https://occasio.app";
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(inviteUrl);
+      }
+    } catch (err) {
+      console.error("Clipboard copy failed:", err);
+    }
+    setCopiedInvite(true);
+    setTimeout(() => setCopiedInvite(false), 2500);
+  };
+
   const handleNavClick = (itemId: NavigationTab) => {
     if (itemId === "saved") openDrawer();
     else setActiveTab(itemId);
@@ -49,6 +70,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   };
 
   const getBadgeCount = (badge?: "saved" | "tickets") => {
+    if (!mounted) return 0;
     if (badge === "saved") return savedCount;
     if (badge === "tickets") return bookedTickets.length;
     return 0;
@@ -61,7 +83,14 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
     >
       {/* Logo */}
       <div className="border-b border-border px-5 py-4 shrink-0">
-        <Logo showTagline size="sm" />
+        <button
+          type="button"
+          onClick={() => handleNavClick("discover")}
+          className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          title="Go to Discover Main Page"
+        >
+          <Logo showTagline size="sm" />
+        </button>
       </div>
 
       {/* Navigation section label */}
@@ -134,10 +163,25 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
           </p>
           <button
             type="button"
-            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-surface py-2 text-[11px] font-semibold text-foreground transition-colors hover:bg-border"
+            onClick={handleSendInvite}
+            className={cn(
+              "mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border py-2 text-[11px] font-semibold transition-all cursor-pointer",
+              copiedInvite
+                ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                : "border-border bg-surface text-foreground hover:bg-border"
+            )}
           >
-            <Gift className="h-3.5 w-3.5 text-muted-foreground" />
-            Send Invite
+            {copiedInvite ? (
+              <>
+                <Check className="h-3.5 w-3.5 text-emerald-500" />
+                Invite Link Copied!
+              </>
+            ) : (
+              <>
+                <Gift className="h-3.5 w-3.5 text-muted-foreground" />
+                Send Invite
+              </>
+            )}
           </button>
         </div>
       </div>
