@@ -52,6 +52,7 @@ export function MagneticButton({
     <motion.button
       ref={ref}
       type={type}
+      suppressHydrationWarning
       style={{ x: springX, y: springY }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -68,3 +69,4 @@ export function MagneticButton({
     </motion.button>
   );
 }
+
