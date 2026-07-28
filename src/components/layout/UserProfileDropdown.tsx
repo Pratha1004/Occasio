@@ -53,6 +53,7 @@ export function UserProfileDropdown() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        suppressHydrationWarning
         className="flex items-center gap-2 rounded-lg border border-border bg-card px-2 py-1.5 transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         aria-label="User profile menu"
         aria-expanded={open}
