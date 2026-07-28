@@ -277,6 +277,7 @@ export function MobileMenuButton({
     <button
       type="button"
       onClick={onClick}
+      suppressHydrationWarning
       className={cn(
         "flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
         className
