@@ -40,6 +40,7 @@ export function NotificationsDropdown() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        suppressHydrationWarning
         className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-surface hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         aria-label={`Notifications, ${unreadCount} unread`}
       >
