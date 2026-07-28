@@ -48,6 +48,7 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.9 }}
           type="button"
+          suppressHydrationWarning
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
