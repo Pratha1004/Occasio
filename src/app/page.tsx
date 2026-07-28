@@ -23,7 +23,7 @@ import type { Event } from "@/lib/types";
 
 function DiscoverView() {
   const { events } = useEvents();
-  const featuredEvent = events.find((e: Event) => e.isFeatured) || events[4] || events[0];
+  const featuredEvent = events.find((e: Event) => e.isFeatured) || events[0];
 
   if (!featuredEvent) return null;
 
