@@ -123,7 +123,12 @@ export function EventsProvider({ children }: { children: ReactNode }) {
       attendees: 1,
     };
 
-    setEvents((prev) => [createdEvent, ...prev]);
+    setEvents((prev) => {
+      const updatedPrev = newEventData.isFeatured
+        ? prev.map((e) => ({ ...e, isFeatured: false }))
+        : prev;
+      return [createdEvent, ...updatedPrev];
+    });
 
     // Persist custom events
     try {
