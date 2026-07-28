@@ -29,6 +29,7 @@ export function CreateEventModal() {
   const [venue, setVenue] = useState("Nesco Center");
   const [price, setPrice] = useState<number>(499);
   const [isFree, setIsFree] = useState(false);
+  const [isFeatured, setIsFeatured] = useState(false);
   const [selectedImage, setSelectedImage] = useState(SAMPLE_IMAGES[0]);
 
   if (!isCreateEventOpen) return null;
@@ -59,6 +60,7 @@ export function CreateEventModal() {
       price: isFree ? 0 : price,
       priceLabel: isFree ? "Free" : `₹${price.toLocaleString()}`,
       isFree,
+      isFeatured,
       image: selectedImage,
       imageAlt: title,
       bookmarkColor: "#2563EB",
@@ -90,6 +92,9 @@ export function CreateEventModal() {
         />
 
         <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-event-modal-title"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -103,7 +108,7 @@ export function CreateEventModal() {
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-foreground">
+                <h2 id="create-event-modal-title" className="text-base font-extrabold text-foreground">
                   Host an Event on Occasio
                 </h2>
                 <p className="text-xs text-muted-foreground">
@@ -275,6 +280,32 @@ export function CreateEventModal() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Feature on Main Hero Banner Switch */}
+            <div className="flex items-center justify-between rounded-2xl border border-border bg-secondary/30 p-3.5">
+              <div>
+                <p className="text-xs font-bold text-foreground">Set as Featured Spotlight Event</p>
+                <p className="text-[11px] text-muted-foreground">Highlight this event at the top of the discovery page</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={isFeatured}
+                aria-label="Set as featured event"
+                onClick={() => setIsFeatured(!isFeatured)}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  isFeatured ? "bg-primary" : "bg-border"
+                }`}
+              >
+                <motion.span
+                  layout
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-xs ${
+                    isFeatured ? "left-[22px]" : "left-1"
+                  }`}
+                />
+              </button>
             </div>
 
             <div className="border-t border-border pt-4 flex justify-end gap-3">
